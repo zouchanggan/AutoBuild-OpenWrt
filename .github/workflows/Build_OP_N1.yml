@@ -77,7 +77,7 @@ jobs:
     #  run: |
     #    git clone -b 18.06 https://github.com/jerrykuku/luci-theme-argon.git package/luci-theme-argon-jerrykuku   
   
-    - name: Configuration Customization - Build_Redmi_AC2100
+    - name: Configuration Customization - Build_N1
       env:
         CONFIG_FILE: 'N1.config'
       run: |
