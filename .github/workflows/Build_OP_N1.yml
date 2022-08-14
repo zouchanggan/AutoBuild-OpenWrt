@@ -68,6 +68,7 @@ jobs:
     - name: Update & Install feeds
       working-directory: ./openwrt
       run: |
+        chmod +x ./customize.sh && ./customize.sh
         ./scripts/feeds update -a
         ./scripts/feeds install -a
         ./scripts/feeds install -a
