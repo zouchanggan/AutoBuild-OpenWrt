@@ -68,11 +68,20 @@ jobs:
     - name: Update & Install feeds
       working-directory: ./openwrt
       run: |
-        chmod +x ./customize.sh && ./customize.sh
         ./scripts/feeds update -a
         ./scripts/feeds install -a
         ./scripts/feeds install -a
+
+    - name: Import external feeds - kenzo
+      working-directory: ./openwrt
+      run: |
+        git clone https://github.com/kenzok8/openwrt-packages.git package/kenzo
         
+    - name: Import external feeds - small
+      working-directory: ./openwrt
+      run: |
+        git clone https://github.com/kenzok8/small.git package/small
+    
     #- name: Import external feeds - JerryKuKu Argon
     #  working-directory: ./openwrt
     #  run: |
