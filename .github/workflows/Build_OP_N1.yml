@@ -85,7 +85,7 @@ jobs:
     #- name: Import external feeds - amlogic
     #  working-directory: ./openwrt
     #  run: |
-        git clone https://github.com/ophub/luci-app-amlogic/tree/main/luci-app-amlogic package/luci-app-amlogic        
+    #    git clone https://github.com/ophub/luci-app-amlogic/tree/main/luci-app-amlogic package/luci-app-amlogic        
     
     - name: Import external feeds - JerryKuKu Argon
       working-directory: ./openwrt
