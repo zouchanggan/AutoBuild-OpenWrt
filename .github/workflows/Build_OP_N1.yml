@@ -82,9 +82,9 @@ jobs:
       run: |
         git clone https://github.com/jerrykuku/luci-app-vssr.git package/vssr
         
-    - name: Import external feeds - amlogic
-      working-directory: ./openwrt
-      run: |
+    #- name: Import external feeds - amlogic
+    #  working-directory: ./openwrt
+    #  run: |
         git clone https://github.com/ophub/luci-app-amlogic/tree/main/luci-app-amlogic package/luci-app-amlogic        
     
     - name: Import external feeds - JerryKuKu Argon
