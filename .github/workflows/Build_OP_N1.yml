@@ -71,21 +71,26 @@ jobs:
         ./scripts/feeds update -a
         ./scripts/feeds install -a
         ./scripts/feeds install -a
-
-    - name: Import external feeds - kenzo
-      working-directory: ./openwrt
-      run: |
-        git clone https://github.com/kenzok8/openwrt-packages.git package/kenzo
         
-    - name: Import external feeds - small
+    - name: Import external feeds - passwall
       working-directory: ./openwrt
       run: |
-        git clone https://github.com/kenzok8/small.git package/small
+        git clone https://github.com/xiaorouji/openwrt-passwall.git package/lienol
+        
+    - name: Import external feeds - vssr
+      working-directory: ./openwrt
+      run: |
+        git clone https://github.com/jerrykuku/luci-app-vssr.git package/vssr
+        
+    - name: Import external feeds - amlogic
+      working-directory: ./openwrt
+      run: |
+        git clone https://github.com/ophub/luci-app-amlogic/trunk/luci-app-amlogic package/luci-app-amlogic        
     
-    #- name: Import external feeds - JerryKuKu Argon
-    #  working-directory: ./openwrt
-    #  run: |
-    #    git clone -b 18.06 https://github.com/jerrykuku/luci-theme-argon.git package/luci-theme-argon-jerrykuku   
+    - name: Import external feeds - JerryKuKu Argon
+      working-directory: ./openwrt
+      run: |
+        git clone -b 21.02 https://github.com/kenzok78/luci-theme-argonne package/luci-theme-argon-jerrykuku   
   
     - name: Configuration Customization - Build_N1
       env:
