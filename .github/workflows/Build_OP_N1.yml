@@ -80,17 +80,9 @@ jobs:
         
     - name: Import external feeds - vssr
       working-directory: ./openwrt
-      run: |
-        cd lede/package/lean/  
-
-git clone https://github.com/jerrykuku/lua-maxminddb.git  #git lua-maxminddb 依赖
-
-git clone https://github.com/jerrykuku/luci-app-vssr.git  
-
-make menuconfig
-
-make -j1 V=s
-        git clone https://github.com/jerrykuku/luci-app-vssr.git package/vssr
+      run: | 
+        git clone https://github.com/jerrykuku/lua-maxminddb.git  package/maxminddb 
+        git clone https://github.com/jerrykuku/luci-app-vssr.git  package/vssr
 
     #- name: Import external feeds - amlogic
     #  working-directory: ./openwrt
