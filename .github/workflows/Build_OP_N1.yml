@@ -125,15 +125,20 @@ jobs:
       env:
         OPENWRT_ARMVIRT: openwrt/bin/targets/*/*/*rootfs.tar.gz
         PACKAGE_SOC: s905d_s905x3_s922x_vplus_beikeyun_l1pro_qemu
-        KERNEL_VERSION_NAME: 5.15.60_5.19.1
+        KERNEL_VERSION_NAME: 5.15.60
 
     - name: Upload OpenWrt Firmware to Release
-      uses: ncipollo/release-action@main
+      id: release
+      uses: ncipollo/release-action@v1
+      if: env.PACKAGED_STATUS == 'success' && env.UPLOAD_RELEASE == 'true' && !cancelled()
       with:
-        tag: openwrt_armvirt_v8_${{ env.PACKAGED_OUTPUTDATE }}
-        artifacts: ${{ env.PACKAGED_OUTPUTPATH }}/*
+        name: R${{ env.DATE }} for ${{ env.FILE_NAME }}
         allowUpdates: true
-        token: ${{ secrets.GH_TOKEN }}
+        removeArtifacts: true
+        tag: ${{ env.FILE_NAME }}
+        commit: main
+        token: ${{ secrets.RELEASES_TOKEN }}
+        artifacts: ${{ env.PACKAGED_OUTPUTPATH }}/*
         body: |
           This is OpenWrt firmware for Armvirt 64
           * Firmware information
