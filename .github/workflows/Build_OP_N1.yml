@@ -83,12 +83,7 @@ jobs:
     #  working-directory: ./openwrt
     #  run: | 
     #    git clone https://github.com/jerrykuku/lua-maxminddb.git  package/maxminddb 
-    #    git clone https://github.com/jerrykuku/luci-app-vssr.git  package/vssr
-
-    #- name: Import external feeds - amlogic
-    #  working-directory: ./openwrt
-    #  run: |
-    #    git clone https://github.com/ophub/luci-app-amlogic/tree/main/luci-app-amlogic package/luci-app-amlogic        
+    #    git clone https://github.com/jerrykuku/luci-app-vssr.git  package/vssr       
     
     #- name: Import external feeds - JerryKuKu Argon
     #  working-directory: ./openwrt
