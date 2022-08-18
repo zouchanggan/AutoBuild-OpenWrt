@@ -127,7 +127,8 @@ jobs:
       uses: ncipollo/release-action@main
       if: env.PACKAGED_STATUS == 'success' && !cancelled()
       with:
-        tag: OpenWrt_s905d_N1_${{ env.DATE }}_${{ env.PACKAGED_OUTPUTDATE }}
+        tag: openwrt_amlogic_s9xxx_${{ env.PACKAGED_OUTPUTDATE }}
+        name: OpenWrt-s9005d | ${{ env.DATE }}
         artifacts: ${{ env.PACKAGED_OUTPUTPATH }}/*
         allowUpdates: true
         removeArtifacts: true
@@ -148,13 +149,12 @@ jobs:
         retain_days: 60
         keep_minimum_runs: 60
 
-    - name: Remove old Releases
-      uses: dev-drprasad/delete-older-releases@v0.2.0
-      if: env.UPLOAD_RELEASE == 'true' && !cancelled()
+    - name: Delete older releases
+      uses: dev-drprasad/delete-older-releases@master
+      if: ${{ github.event.inputs.delete_older_releases }} == 'true'
       with:
-        repo:
-        keep_latest: 30
-        delete_tag_pattern:
-        delete_tags: true
+        keep_latest: ${{ github.event.inputs.keep_latest }}
+        delete_tags: ${{ github.event.inputs.delete_tags }}
+        delete_tag_pattern: ${{ github.event.inputs.delete_tag_pattern }}
       env:
-        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}          
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}           
