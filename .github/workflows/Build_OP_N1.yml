@@ -125,15 +125,14 @@ jobs:
         KERNEL_AUTO_LATEST: true
         GZIP_IMGS: .gz
 
-    - name: Upload OpenWrt Firmware to Release
-      uses: ncipollo/release-action@main
-      if: env.PACKAGED_STATUS == 'success' && !cancelled()
-      with:
-        tag: OpenWrt_s9005d_N1_${{ env.DATE }}_${{ env.PACKAGED_OUTPUTDATE }}
-        artifacts: ${{ env.PACKAGED_OUTPUTPATH }}/*
-        allowUpdates: true
-        removeArtifacts: true
-        token: ${{ secrets.GH_TOKEN }}
+      - name: Upload OpenWrt Firmware to Release
+        uses: ncipollo/release-action@main
+        if: env.PACKAGED_STATUS == 'success' && !cancelled()
+        with:
+          tag: OpenWrt_s9005d_${{ github.event.inputs.branch }}_${{ env.PACKAGED_OUTPUTDATE }}
+          artifacts: ${{ env.PACKAGED_OUTPUTPATH }}/*
+          allowUpdates: true
+          token: ${{ secrets.GH_TOKEN }}
         body: |
           This is OpenWrt firmware for Amlogic s9xxx tv box
           * Firmware information
@@ -149,13 +148,3 @@ jobs:
         repository: ${{ github.repository }}
         retain_days: 60
         keep_minimum_runs: 60
-
-    - name: Delete older releases
-      uses: dev-drprasad/delete-older-releases@master
-      if: ${{ github.event.inputs.delete_older_releases }} == 'true'
-      with:
-        keep_latest: ${{ github.event.inputs.keep_latest }}
-        delete_tags: ${{ github.event.inputs.delete_tags }}
-        delete_tag_pattern: ${{ github.event.inputs.delete_tag_pattern }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}           
