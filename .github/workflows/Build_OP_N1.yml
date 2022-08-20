@@ -61,7 +61,11 @@ jobs:
       env: 
         REPO_URL: https://github.com/coolsnowwolf/lede
         REPO_BRANCH: master
+        UPLOAD_FIRMWARE: false
+        UPLOAD_RELEASE: true
         TZ: Asia/Shanghai
+        FILE_NAME: Phicomm_N1
+        PRODUCT_NAME: Phicomm_N1
       run: |
         git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
         cd openwrt
@@ -129,13 +133,17 @@ jobs:
         GZIP_IMGS: .gz
 
     - name: Upload OpenWrt Firmware to Release
-      uses: ncipollo/release-action@main
-      if: env.PACKAGED_STATUS == 'success' && !cancelled()
+      id: release
+      uses: ncipollo/release-action@v1
+      if: env.PACKAGED_STATUS == 'success' && env.UPLOAD_RELEASE == 'true' && !cancelled()
       with:
-        tag: OpenWrt_s905d_R${{ env.DATE }}_${{ env.PACKAGED_OUTPUTDATE }}
-        artifacts: ${{ env.PACKAGED_OUTPUTPATH }}/*
+        name: R${{ env.DATE }} for ${{ env.FILE_NAME }}
         allowUpdates: true
+        removeArtifacts: true
+        tag: ${{ env.FILE_NAME }}
+        commit: main
         token: ${{ secrets.GH_TOKEN }}
+        artifacts: ${{ env.PACKAGED_OUTPUTPATH }}/*
         body: |
           This is OpenWrt firmware for Amlogic s9xxx tv box
           * Firmware information
