@@ -86,13 +86,7 @@ jobs:
     #- name: Import external feeds - passwall
     #  working-directory: ./openwrt
     #  run: |
-    #    git clone https://github.com/xiaorouji/openwrt-passwall.git package/lienol
-        
-    #- name: Import external feeds - vssr
-    #  working-directory: ./openwrt
-    #  run: | 
-    #    git clone https://github.com/jerrykuku/lua-maxminddb.git  package/maxminddb 
-    #    git clone https://github.com/jerrykuku/luci-app-vssr.git  package/vssr       
+    #    git clone https://github.com/xiaorouji/openwrt-passwall.git package/lienol      
     
     #- name: Import external feeds - JerryKuKu Argon
     #  working-directory: ./openwrt
@@ -132,18 +126,14 @@ jobs:
         KERNEL_AUTO_LATEST: true
         GZIP_IMGS: .gz
 
-    - name: Upload OpenWrt Firmware to Release
-      id: release
-      uses: ncipollo/release-action@v1
-      if: env.PACKAGED_STATUS == 'success' && env.UPLOAD_RELEASE == 'true' && !cancelled()
-      with:
-        tag: OpenWrt_s905d_${{ env.PACKAGED_OUTPUTDATE }}
-        allowUpdates: true
-        removeArtifacts: true
-        name: OpenWrt-N1 | ${{ env.DATE }}
-        commit: main
-        token: ${{ secrets.GH_TOKEN }}
-        artifacts: ${{ env.PACKAGED_OUTPUTPATH }}/*
+      - name: Upload OpenWrt Firmware to Release
+        uses: ncipollo/release-action@main
+        if: env.PACKAGED_STATUS == 'success' && !cancelled()
+        with:
+          tag: OpenWrt_N1_${{ github.event.inputs.branch }}_${{ env.PACKAGED_OUTPUTDATE }}
+          artifacts: ${{ env.PACKAGED_OUTPUTPATH }}/*
+          allowUpdates: true
+          token: ${{ secrets.GH_TOKEN }}
         body: |
           This is OpenWrt firmware for Amlogic s9xxx tv box
           * Firmware information
