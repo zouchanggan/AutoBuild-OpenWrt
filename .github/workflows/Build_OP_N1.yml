@@ -5,7 +5,7 @@
 # Youtube Channel: https://goo.gl/fvkdwm 
 #=================================================
 
-name: Build_Phicomm_N1
+name: Phicomm_N1
 
 on: 
   release:
@@ -86,7 +86,7 @@ jobs:
     #  run: |
     #    git clone -b 21.02 https://github.com/kenzok78/luci-theme-argonne package/luci-theme-argon-jerrykuku   
   
-    - name: Configuration Customization - Build_Phicomm_N1
+    - name: Configuration Customization - Phicomm_N1
       env:
         CONFIG_FILE: 'N1.config'
       run: |
@@ -123,7 +123,7 @@ jobs:
       uses: ncipollo/release-action@main
       if: env.PACKAGED_STATUS == 'success' && !cancelled()
       with:
-        tag: OpenWrt_N1_${{ github.event.inputs.branch }}_${{ env.PACKAGED_OUTPUTDATE }}
+        tag: ${{ github.ref }}
         artifacts: ${{ env.PACKAGED_OUTPUTPATH }}/*
         allowUpdates: true
         token: ${{ secrets.GH_TOKEN }}
