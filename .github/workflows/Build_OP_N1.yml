@@ -61,13 +61,22 @@ jobs:
       env: 
         REPO_URL: https://github.com/coolsnowwolf/lede
         REPO_BRANCH: master
+        UPLOAD_FIRMWARE: false
+        UPLOAD_RELEASE: true
+        RECENT_LASTEST: 30
         TZ: Asia/Shanghai
+        FILE_NAME: N1
+        PRODUCT_NAME: N1
       run: |
         git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
         cd openwrt
         echo "src-git ssrp https://github.com/fw876/helloworld.git" >> ./feeds.conf.default
         echo "src-git kenzo https://github.com/kenzok8/openwrt-packages" >> ./feeds.conf.default
         echo "src-git small https://github.com/kenzok8/small" >> ./feeds.conf.default
+        useVersionInfo=$(git show -s --date=short --format="Author: %an<br/>date: %cd<br/>commit: %s<br/>commit hash: %H")
+        echo "useVersionInfo=$useVersionInfo" >> $GITHUB_ENV
+        echo "DATE=$(date "+%Y-%m-%d %H:%M:%S")" >> $GITHUB_ENV
+        echo "DATE1=$(date "+%Y-%m-%d")" >> $GITHUB_ENV        
 
     - name: Update & Install feeds
       working-directory: ./openwrt
@@ -120,15 +129,19 @@ jobs:
         GZIP_IMGS: .gz
 
     - name: Upload OpenWrt Firmware to Release
-      uses: ncipollo/release-action@main
-      if: env.PACKAGED_STATUS == 'success' && !cancelled()
+      id: release
+      uses: ncipollo/release-action@v1
+      if: env.PACKAGED_STATUS == 'success' && env.UPLOAD_RELEASE == 'true' && !cancelled()
       with:
-        tag: ${{ github.ref }}
-        artifacts: ${{ env.PACKAGED_OUTPUTPATH }}/*
+        name: R${{ env.DATE }} for ${{ env.FILE_NAME }}
         allowUpdates: true
-        token: ${{ secrets.GH_TOKEN }}
+        removeArtifacts: true
+        tag: ${{ env.FILE_NAME }}
+        commit: main
+        token: ${{ secrets.RELEASES_TOKEN }}
+        artifacts: ${{ env.PACKAGED_OUTPUTPATH }}/*
         body: |
-          This is OpenWrt firmware for Amlogic s9xxx tv box
+          This is OpenWrt firmware for Amlogic s9005d tv box
           * Firmware information
           - 默认IP：192.168.1.10 默认密码：password
           - 当前使用版本:【编译前的最后一次➦[主源码](https://github.com/coolsnowwolf/lede)更新记录】
