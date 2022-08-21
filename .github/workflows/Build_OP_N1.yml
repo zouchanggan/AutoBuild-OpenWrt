@@ -132,7 +132,7 @@ jobs:
         allowUpdates: true
         tag: ${{ env.tag_name }}
         commit: main
-        token: ${{ secrets.actions_release }}
+        token: ${{ secrets.GH_TOKEN }}
         body: |
           This is OpenWrt firmware for Amlogic s9005d tv box
           * Firmware information
@@ -147,4 +147,4 @@ jobs:
         keep_latest: 3
         delete_tags: true
       env:
-        GITHUB_TOKEN: ${{ secrets.actions_release }}
+        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
