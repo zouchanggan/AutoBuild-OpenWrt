@@ -25,15 +25,12 @@ env:
   PRODUCT_NAME: ARMv8
 
 jobs:
-  build_openwrt:
-    name: Build OpenWrt and release
-    runs-on: ubuntu-20.04
+  build:
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
-      with:
-        ref: main
+      uses: actions/checkout@master
 
     - name: Initialization environment
       env:
