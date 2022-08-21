@@ -1,11 +1,8 @@
 name: Cloud N1 OpenWrt
 
-on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'README.md'
+on: 
+  release:
+    types: [published]
   push:
     branches: 
       - master
