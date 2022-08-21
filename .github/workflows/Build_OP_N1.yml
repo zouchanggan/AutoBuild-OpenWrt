@@ -17,7 +17,7 @@ on:
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
-  UPLOAD_FIRMWARE: false
+  UPLOAD_FIRMWARE: true
   UPLOAD_RELEASE: true
   RECENT_LASTEST: 30
   TZ: Asia/Shanghai
@@ -57,12 +57,14 @@ jobs:
         echo "useVersionInfo=$useVersionInfo" >> $GITHUB_ENV
         echo "DATE=$(date "+%Y-%m-%d %H:%M:%S")" >> $GITHUB_ENV
         echo "tag_name=$(date +%Y%m%d)" >> $GITHUB_ENV
+        
     - name: Update & Install feeds
       working-directory: ./openwrt
       run: |
         ./scripts/feeds update -a
         ./scripts/feeds install -a
         ./scripts/feeds install -a
+        
     - name: Configuration Customization - Phicomm_N1
       env:
         CONFIG_FILE: 'N1.config'
@@ -76,6 +78,7 @@ jobs:
         make defconfig
         make download -j8
         find dl -size -1024c -exec rm -f {} \;
+        
     - name: Compile the firmware
       run: |
         cd openwrt
@@ -90,6 +93,7 @@ jobs:
         du -h --max-depth=1 ./build_dir
         du -h --max-depth=1 ./bin
         echo "::set-output name=status::success"
+        
     - name: Package Armvirt as OpenWrt
       if: (!cancelled())
       uses: unifreq/openwrt_packit@master
@@ -111,6 +115,7 @@ jobs:
         rm -rf packages openwrt-armvirt-64-default.manifest openwrt-armvirt-64-Image sha256sums version.buildinfo feeds.buildinfo
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "::set-output name=status::success"
+        
     - name: Upload firmware directory
       uses: actions/upload-artifact@v3
       if: steps.organize.outputs.status == 'success' && !cancelled()
@@ -119,18 +124,15 @@ jobs:
         path: |
             ${{ env.FIRMWARE }}
             ${{ env.PACKAGED_OUTPUTPATH }}
-    - name: Upload OpenWrt Firmware to Release
-      id: release
+            
+    - name: Create release
       uses: ncipollo/release-action@v1
-      if: env.PACKAGED_STATUS == 'success' && env.UPLOAD_RELEASE == 'true' && !cancelled()
       with:
-        name: R${{ env.DATE }} for ${{ env.FILE_NAME }}
+        name: ${{ env.DATE }} ❤️ | N1-OpenWrt 自动编译打包
         allowUpdates: true
-        removeArtifacts: true
-        tag: ${{ env.FILE_NAME }}
+        tag: ${{ env.tag_name }}
         commit: main
-        token: ${{ secrets.RELEASES_TOKEN }}
-        artifacts: ${{ env.PACKAGED_OUTPUTPATH }}/*
+        token: ${{ secrets.actions_release }}
         body: |
           This is OpenWrt firmware for Amlogic s9005d tv box
           * Firmware information
