@@ -1,29 +1,38 @@
-name: Cloud N1 OpenWrt
 
-on: 
-  release:
-    types: [published]
+name: N1-OpenWrt-Lede
+
+
+on:
+  repository_dispatch:
+  workflow_dispatch:
+    inputs:
+        
   push:
-    branches: 
-      - master
-      
+   branches: 
+     - master       
+
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
+  CONFIG_FILE: .config
+  SCRIPT_SH: script.sh
+  #CONFIG_SH: config.sh
   UPLOAD_FIRMWARE: true
-  UPLOAD_RELEASE: true
-  RECENT_LASTEST: 30
   TZ: Asia/Shanghai
-  FILE_NAME: ARMv8
-  PRODUCT_NAME: ARMv8
+  FILE_NAME: OpenWrt_N1
+  PRODUCT_NAME: OpenWrt_N1
+  KERNEL_VERSION: 5.4.210_5.15.60_5.19.1
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  build_openwrt:
+    name: Build OpenWrt and release
+    runs-on: ubuntu-20.04
 
     steps:
     - name: Checkout
-      uses: actions/checkout@master
+      uses: actions/checkout@v2
+      with:
+        ref: main
 
     - name: Initialization environment
       env:
@@ -39,39 +48,43 @@ jobs:
         sudo -E apt-get clean
         sudo timedatectl set-timezone "$TZ"
         df -h
+
     - name: Clone source code
       run: |
         git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
         cd openwrt
-        echo "src-git ssrp https://github.com/fw876/helloworld.git" >> ./feeds.conf.default
-        echo "src-git kenzo https://github.com/kenzok8/openwrt-packages" >> ./feeds.conf.default
-        echo "src-git small https://github.com/kenzok8/small" >> ./feeds.conf.default        
         useVersionInfo=$(git show -s --date=short --format="date: %cd<br/>commit: %s<br/>commit hash: %H")
         echo "useVersionInfo=$useVersionInfo" >> $GITHUB_ENV
         echo "DATE=$(date "+%Y-%m-%d %H:%M:%S")" >> $GITHUB_ENV
         echo "tag_name=$(date +%Y%m%d)" >> $GITHUB_ENV
-        
-    - name: Update & Install feeds
-      working-directory: ./openwrt
+
+    - name: Update feeds
       run: |
-        ./scripts/feeds update -a
+        [ -e files ] && mv files openwrt/files
+        chmod +x $SCRIPT_SH
+        ./$SCRIPT_SH
+        cd openwrt && ./scripts/feeds update -a       
+
+    - name: Install feeds
+      run: |
+        cd openwrt
         ./scripts/feeds install -a
-        ./scripts/feeds install -a
-        
-    - name: Configuration Customization - Phicomm_N1
+
+    - name: Load custom configuration
       env:
         CONFIG_FILE: 'N1.config'
       run: |
         [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
         chmod +x ./customize.sh && ./customize.sh
         cd openwrt && make defconfig
+
     - name: Download package
       run: |
         cd openwrt
         make defconfig
         make download -j8
         find dl -size -1024c -exec rm -f {} \;
-        
+
     - name: Compile the firmware
       run: |
         cd openwrt
@@ -86,19 +99,16 @@ jobs:
         du -h --max-depth=1 ./build_dir
         du -h --max-depth=1 ./bin
         echo "::set-output name=status::success"
-        
+
     - name: Package Armvirt as OpenWrt
-      if: (!cancelled())
-      uses: unifreq/openwrt_packit@master
+      uses: ophub/flippy-openwrt-actions@main
       env:
         OPENWRT_ARMVIRT: openwrt/bin/targets/*/*/*.tar.gz
         PACKAGE_SOC: s905d
+        KERNEL_VERSION_NAME: ${{ env.KERNEL_VERSION }}
         WHOAMI: breakings
-        KERNEL_REPO_URL: https://github.com/breakings/OpenWrt/tree/main/opt/kernel
-        KERNEL_VERSION_NAME: 5.4.210_5.15.60_5.19.1
-        #OPENWRT_VER: R21.12.1
         KERNEL_AUTO_LATEST: true
-        GZIP_IMGS: .gz
+        GZIP_IMGS: .gz        
 
     - name: Organize files
       id: organize
@@ -108,7 +118,7 @@ jobs:
         rm -rf packages openwrt-armvirt-64-default.manifest openwrt-armvirt-64-Image sha256sums version.buildinfo feeds.buildinfo
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "::set-output name=status::success"
-        
+
     - name: Upload firmware directory
       uses: actions/upload-artifact@v3
       if: steps.organize.outputs.status == 'success' && !cancelled()
@@ -117,22 +127,25 @@ jobs:
         path: |
             ${{ env.FIRMWARE }}
             ${{ env.PACKAGED_OUTPUTPATH }}
-            
+
     - name: Create release
       uses: ncipollo/release-action@v1
       with:
-        name: ${{ env.DATE }} ❤️ | N1-OpenWrt 自动编译打包
+        name: ${{ env.DATE }} for ${{ env.FILE_NAME }}
         allowUpdates: true
-        tag: ${{ env.tag_name }}
+        tag: ${{ env.FILE_NAME }}
         commit: main
         token: ${{ secrets.GH_TOKEN }}
         body: |
-          This is OpenWrt firmware for Amlogic s9005d tv box
-          * Firmware information
-          - 默认IP：192.168.1.10 默认密码：password
-          - 当前使用版本:【编译前的最后一次➦[主源码](https://github.com/coolsnowwolf/lede)更新记录】
-          - Install to EMMC: Login to OpenWrt → System → Amlogic Service → Install OpenWrt
+          编译使用版本:
           ${{ env.useVersionInfo }}
+          
+          刷机固件简介：
+            打包日期：${{ env.PACKAGED_OUTPUTDATE }}
+            内核版本：${{ env.KERNEL_VERSION }}
+            当前使用版本:【编译前的最后一次➦[主源码](https://github.com/coolsnowwolf/lede)更新记录】
+            默认IP：192.168.1.10 用户名：root 默认密码：password
+        artifacts: "${{ env.FIRMWARE }}/*,${{ env.PACKAGED_OUTPUTPATH }}/*"
 
     - name: Remove old Releases
       uses: dev-drprasad/delete-older-releases@v0.1.0
@@ -140,4 +153,4 @@ jobs:
         keep_latest: 3
         delete_tags: true
       env:
-        GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
