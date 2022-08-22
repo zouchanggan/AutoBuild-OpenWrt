@@ -14,14 +14,3 @@ sed -i 's/$1$V4UetPzk$CYXluq4wUazHjmCDBCqXF.//g' openwrt/package/lean/default-se
 #3. Replace with JerryKuKu’s Argon
 #rm openwrt/package/lean/luci-theme-argon -rf
 
-#!/bin/bash
-cd openwrt
-# wireless
-rm -rf files/etc/config/wireless
-rm -rf files/etc/modules.d/wireless_enable
-# amlogic
-rm -rf files/etc/config/amlogic
-# network
-rm -rf files/etc/config/network
-# dhcp
-rm -rf files/etc/config/dhcp
