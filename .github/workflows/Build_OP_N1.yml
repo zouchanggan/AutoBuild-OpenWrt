@@ -15,9 +15,9 @@ env:
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
   CONFIG_FILE: N1.config
-  #SCRIPT_SH: script.sh
-  #CONFIG_SH: config.sh
+  SCRIPT_SH: script.sh
   SRC_SH: src.sh
+  #CONFIG_SH: config.sh
   UPLOAD_FIRMWARE: true
   TZ: Asia/Shanghai
   FILE_NAME: OpenWrt_N1
@@ -59,11 +59,17 @@ jobs:
         echo "DATE=$(date "+%Y-%m-%d %H:%M:%S")" >> $GITHUB_ENV
         echo "tag_name=$(date +%Y%m%d)" >> $GITHUB_ENV
 
+    - name: Load custom feeds
+      run: |
+        [ -e files ] && mv files openwrt/files
+        chmod +x $SCRIPT_SH
+        ./$SCRIPT_SH
+        
     - name: Update feeds
       run: |
         chmod +x $SRC_SH
         ./$SRC_SH
-        cd openwrt && ./scripts/feeds update -a       
+        cd openwrt && ./scripts/feeds update -a        
 
     - name: Install feeds
       run: |
@@ -74,7 +80,6 @@ jobs:
       env:
         CONFIG_FILE: 'N1.config'
       run: |
-        [ -e files ] && mv files openwrt/files
         [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
         chmod +x ./customize.sh && ./customize.sh
         cd openwrt && make defconfig
