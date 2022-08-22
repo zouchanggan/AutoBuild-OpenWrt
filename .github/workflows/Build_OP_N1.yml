@@ -6,8 +6,8 @@ on:
       - main
     paths:
       - 'README.md'
-  schedule:
-    - cron: 0 8 * * 0
+  watch:
+    types: [started]
 
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
