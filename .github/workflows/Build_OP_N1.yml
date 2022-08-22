@@ -1,13 +1,15 @@
-name: Cloud N1 OpenWrt
+
+name: N1-OpenWrt-Lede
+
 
 on:
+  repository_dispatch:
+  workflow_dispatch:
+    inputs:
+        
   push:
-    branches:
-      - main
-    paths:
-      - 'README.md'
-  watch:
-    types: [started]
+   branches: 
+     - master 
 
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
