@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
         
-  push:
-   branches: 
-     - master 
+  #push:
+   #branches: 
+     #- master 
 
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
