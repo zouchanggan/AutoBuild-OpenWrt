@@ -106,7 +106,7 @@ jobs:
     #  run: |
     #    git clone -b 18.06 https://github.com/jerrykuku/luci-theme-argon.git package/luci-theme-argon-jerrykuku   
   
-    - name: Configuration Customization - Build_Redmi_AC2100
+    - name: Configuration Customization
       env:
         CONFIG_FILE: 'N1.config'
       run: |
@@ -126,11 +126,6 @@ jobs:
       run: |
         echo -e "$(nproc) thread build."
         make -j$(nproc) V=s
-    - name : Upload artifact
-      uses: actions/upload-artifact@master
-      with:
-        name: OpenWrt
-        path: openwrt/bin
 
     - name: Package Armvirt as OpenWrt
       uses: ophub/flippy-openwrt-actions@main
