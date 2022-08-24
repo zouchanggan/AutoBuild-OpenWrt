@@ -82,7 +82,7 @@ jobs:
         echo "useVersionInfo=$useVersionInfo" >> $GITHUB_ENV
         echo "DATE=$(date "+%Y-%m-%d %H:%M:%S")" >> $GITHUB_ENV
         echo "tag_name=$(date +%Y%m%d)" >> $GITHUB_ENV
-        echo "DATE1=$(date "+%Y-%m-%d")" >> $GITHUB_ENV
+        echo "DATE1=$(date)" >> $GITHUB_ENV
         
     - name: Load custom feeds
       run: |
@@ -160,7 +160,7 @@ jobs:
       with:
         name: ${{ env.DATE }} for Openwrt_N1
         allowUpdates: true
-        tag: ${{ env. FILE_NAME }}
+        tag: ARMv8 ${{ env.DATE1 }}
         commit: main
         token: ${{ secrets.GH_TOKEN }}
         body: |
