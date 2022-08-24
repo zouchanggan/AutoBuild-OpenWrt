@@ -30,8 +30,8 @@ env:
   #CONFIG_SH: config.sh
   UPLOAD_FIRMWARE: true
   TZ: Asia/Shanghai
-  FILE_NAME: OpenWrt_N1
-  PRODUCT_NAME: OpenWrt_N1
+  FILE_NAME: ARMv8
+  PRODUCT_NAME: S905d
   KERNEL_VERSION: 5.15.62
 
 jobs:
@@ -82,6 +82,7 @@ jobs:
         echo "useVersionInfo=$useVersionInfo" >> $GITHUB_ENV
         echo "DATE=$(date "+%Y-%m-%d %H:%M:%S")" >> $GITHUB_ENV
         echo "tag_name=$(date +%Y%m%d)" >> $GITHUB_ENV
+        echo "DATE1=$(date "+%Y-%m-%d")" >> $GITHUB_ENV
         
     - name: Load custom feeds
       run: |
@@ -157,9 +158,9 @@ jobs:
     - name: Upload OpenWrt Firmware to Release
       uses: ncipollo/release-action@v1
       with:
-        name: ${{ env.DATE }}_${{ env.PRODUCT_NAME }}
+        name: ${{ env.DATE }} for ${{ env.FILE_NAME }}
         allowUpdates: true
-        tag: ${{ env.FILE_NAME }}
+        tag: ${{ env.PRODUCT_NAME }}
         commit: main
         token: ${{ secrets.GH_TOKEN }}
         body: |
