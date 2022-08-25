@@ -160,7 +160,7 @@ jobs:
       with:
         name: ${{ env.DATE }} for Openwrt_N1
         allowUpdates: true
-        tag: ARMv8 ${{ env.DATE1 }}
+        tag: ARMv8
         commit: main
         token: ${{ secrets.GH_TOKEN }}
         body: |
