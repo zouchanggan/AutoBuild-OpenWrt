@@ -34,16 +34,32 @@ env:
   PRODUCT_NAME: S905d
   KERNEL_VERSION: 5.15.62
 
+  #  - cron: 0 8 * * 5
+  
+  #watch:
+  #  types: [started]
+  
+env:
+  REPO_URL: https://github.com/coolsnowwolf/lede
+  REPO_BRANCH: master
+  CONFIG_FILE: .config
+  SCRIPT_SH: script.sh
+  SRC_SH: src.sh
+  #CONFIG_SH: config.sh
+  UPLOAD_FIRMWARE: true
+  TZ: Asia/Shanghai
+  FILE_NAME: ARMv8
+  PRODUCT_NAME: S905d
+  KERNEL_VERSION: 5.15.62
+
 jobs:
-  build_openwrt:
-    name: Build OpenWrt and release
-    runs-on: ubuntu-20.04
+  build:
+    runs-on: ubuntu-22.04
+    if: github.event.repository.owner.id == github.event.sender.id
 
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-      with:
-        ref: main
 
     - name: Initialization environment
       env:
