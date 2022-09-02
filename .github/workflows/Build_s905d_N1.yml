@@ -141,9 +141,9 @@ jobs:
     - name: Upload OpenWrt Firmware to Release
       uses: ncipollo/release-action@v1
       with:
-        name: ${{ env.DATE }} ❤️ | N1-OpenWrt 自动编译打包
+        name: OpenWrt_N1_${{ env.PACKAGED_OUTPUTDATE }}
         allowUpdates: true
-        tag: ${{ env.tag_name }}
+        tag: ${{ env.FILE_NAME }}
         commit: main
         token: ${{ secrets.GH_TOKEN }}
         body: |
