@@ -34,18 +34,21 @@ env:
   KERNEL_VERSION: 5.15.62
 
 jobs:
-  build:
-    runs-on: ubuntu-22.04
-    if: github.event.repository.owner.id == github.event.sender.id
+  build_openwrt:
+    name: Build OpenWrt and release
+    runs-on: ubuntu-20.04
 
     steps:
     - name: Checkout
       uses: actions/checkout@v2
+      with:
+        ref: main
 
     - name: Initialization environment
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
+        docker rmi `docker images -q`
         sudo rm -rf /usr/share/dotnet /etc/mysql /etc/php /etc/apt/sources.list.d
         sudo -E apt-get -y purge azure-cli ghc* zulu* hhvm llvm* firefox google* dotnet* powershell openjdk* mysql* php*
         sudo -E apt update -y
