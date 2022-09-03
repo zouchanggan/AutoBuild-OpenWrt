@@ -7,19 +7,14 @@
 
 name: Build_OpenWrt-Lede
 
-on: 
-  release:
-    types: [published]
-
-  #push:
-  #  branches: 
-  #    - master
-
-  #schedule:
-  #  - cron: 0 8 * * 5
-  
-  watch:
-    types: [started]
+on:
+  repository_dispatch:
+  workflow_dispatch:
+    inputs:
+        
+  push:
+   branches: 
+     - master 
   
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
