@@ -27,7 +27,6 @@ env:
   CONFIG_FILE: .config
   SCRIPT_SH: script.sh
   SRC_SH: src.sh
-  #CONFIG_SH: config.sh
   UPLOAD_FIRMWARE: true
   TZ: Asia/Shanghai
   FILE_NAME: ARMv8
@@ -44,17 +43,16 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Initialization environment
-      id: init
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
-        sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc 2>/dev/null
-        sudo -E apt-get -qq update
-        sudo -E apt-get -qq install $(curl -fsSL https://is.gd/depend_ubuntu2204_openwrt)
-        sudo -E apt-get -qq autoremove --purge
-        sudo -E apt-get -qq clean
-        sudo timedatectl set-timezone "${TZ}"
-        echo "::set-output name=status::success"
+        sudo rm -rf /usr/share/dotnet /etc/mysql /etc/php /etc/apt/sources.list.d
+        sudo -E apt-get -y purge azure-cli ghc* zulu* hhvm llvm* firefox google* dotnet* powershell openjdk* mysql* php*
+        sudo -E apt update -y
+        sudo -E apt full-upgrade -y
+        sudo -E apt install -y ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext gcc-multilib g++-multilib git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libglib2.0-dev libgmp3-dev libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool lrzsz mkisofs msmtp nano ninja-build p7zip p7zip-full patch pkgconf python2.7 python3 python3-pip qemu-utils rsync scons squashfs-tools subversion swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev
+        sudo -E apt-get -y autoremove --purge
+        sudo -E apt-get clean
         sudo timedatectl set-timezone "$TZ"
         df -h
     - name: Clone source code
@@ -116,9 +114,7 @@ jobs:
         OPENWRT_ARMVIRT: openwrt/bin/targets/*/*/*.tar.gz
         PACKAGE_SOC: s905d
         KERNEL_VERSION_NAME: ${{ env.KERNEL_VERSION }}
-        WHOAMI: breakings
-        KERNEL_AUTO_LATEST: true
-        GZIP_IMGS: .gz        
+        WHOAMI: breakings      
 
     - name: Organize files
       id: organize
@@ -141,9 +137,9 @@ jobs:
     - name: Upload OpenWrt Firmware to Release
       uses: ncipollo/release-action@v1
       with:
-        name: OpenWrt_N1_${{ env.PACKAGED_OUTPUTDATE }}
+        name: ${{ env.DATE }} ❤️ | N1-OpenWrt 自动编译打包
         allowUpdates: true
-        tag: ${{ env.FILE_NAME }}
+        tag: ${{ env.tag_name }}
         commit: main
         token: ${{ secrets.GH_TOKEN }}
         body: |
