@@ -12,9 +12,8 @@ on:
   workflow_dispatch:
     inputs:
         
-  push:
-   branches: 
-     - master 
+  watch:
+    types: [started] 
   
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
