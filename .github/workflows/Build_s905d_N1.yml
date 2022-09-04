@@ -24,8 +24,8 @@ env:
   SRC_SH: src.sh
   UPLOAD_FIRMWARE: true
   TZ: Asia/Shanghai
-  FILE_NAME: ARMv8
-  PRODUCT_NAME: S905d
+  FILE_NAME: Openwrt-N1
+  PRODUCT_NAME: ARMv8
   KERNEL_VERSION: 5.19.6
 
 jobs:
@@ -131,8 +131,8 @@ jobs:
     - name: Upload OpenWrt Firmware to Release
       uses: ncipollo/release-action@main
       with:
-        name: ${{ env.DATE }} for Openwrt-N1
-        tag: ${{ env.FILE_NAME }}
+        name: ${{ env.DATE }} for ${{ env.FILE_NAME }}
+        tag: ${{ env.PRODUCT_NAME }}
         artifacts: ${{ env.PACKAGED_OUTPUTPATH }}/*
         allowUpdates: true
         removeArtifacts: true
