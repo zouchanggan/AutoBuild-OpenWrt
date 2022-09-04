@@ -136,7 +136,7 @@ jobs:
         artifacts: ${{ env.PACKAGED_OUTPUTPATH }}/*
         allowUpdates: true
         removeArtifacts: true
-        token: ${{ secrets.GH_TOKEN }}
+        token: ${{ secrets.RELEASES_TOKEN }}
         body: |
           编译使用版本:
           ${{ env.useVersionInfo }}         
