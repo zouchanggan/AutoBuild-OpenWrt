@@ -138,12 +138,11 @@ jobs:
       uses: ncipollo/release-action@main
       with:
         name: ${{ env.DATE }} for ${{ env.FILE_NAME }}
+        tag: ${{ env.PRODUCT_NAME }}
         allowUpdates: true
         removeArtifacts: true
-        tag: ${{ env.PRODUCT_NAME }}
-        commit: main
-        token: ${{ secrets.GITHUB_TOKEN }}
         artifacts: ${{ env.PACKAGED_OUTPUTPATH }}/*
+        token: ${{ secrets.GITHUB_TOKEN }}
         body: |
           编译固件简介:
             打包日期：${{ env.PACKAGED_OUTPUTDATE }}
