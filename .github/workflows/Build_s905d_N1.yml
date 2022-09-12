@@ -138,7 +138,7 @@ jobs:
       uses: ncipollo/release-action@main
       with:
         name: ${{ env.DATE }} for ${{ env.FILE_NAME }}
-        tag: ${{ env.tag_name }}
+        tag: ${{ env.PRODUCT_NAME }}_${{ env.tag_name }}
         allowUpdates: true
         removeArtifacts: true
         artifacts: ${{ env.PACKAGED_OUTPUTPATH }}/*
