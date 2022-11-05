@@ -138,18 +138,19 @@ jobs:
       uses: ncipollo/release-action@main
       with:
         name: ${{ env.DATE }} for ${{ env.FILE_NAME }}
-        tag: ${{ env.PRODUCT_NAME }}_${{ env.tag_name }}
         allowUpdates: true
         removeArtifacts: true
-        artifacts: ${{ env.PACKAGED_OUTPUTPATH }}/*
+        tag: ${{ env.PRODUCT_NAME }}_${{ env.tag_name }}
+        commit: main
         token: ${{ secrets.GITHUB_TOKEN }}
+        artifacts: ${{ env.PACKAGED_OUTPUTPATH }}/*
         body: |
           编译固件简介:
-          ${{ env.useVersionInfo }}         
+          ${{ env.useVersionInfo }}
             打包日期：${{ env.PACKAGED_OUTPUTDATE }}
             当前使用版本:【编译前的最后一次➦[主源码](https://github.com/coolsnowwolf/lede)更新记录】
             默认IP：192.168.1.10 用户名：root 默认密码：password
-        
+                   
     - name: Delete workflow runs
       uses: GitRML/delete-workflow-runs@main
       with:
@@ -161,7 +162,7 @@ jobs:
     - name: Remove old Releases
       uses: dev-drprasad/delete-older-releases@v0.1.0
       with:
-        keep_latest: 30
+        keep_latest: 5
         delete_tags: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
