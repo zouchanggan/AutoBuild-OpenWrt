@@ -141,7 +141,6 @@ jobs:
         tag: ${{ env.PRODUCT_NAME }}_${{ env.tag_name }}
         allowUpdates: true
         removeArtifacts: true
-        commit: main
         artifacts: ${{ env.PACKAGED_OUTPUTPATH }}/*
         token: ${{ secrets.GITHUB_TOKEN }}
         body: |
