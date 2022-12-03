@@ -1,0 +1,147 @@
+#=================================================
+# Description: Build OpenWrt using GitHub Actions
+# Lisence: MIT
+# Author: eSirPlayground
+# Youtube Channel: https://goo.gl/fvkdwm 
+#=================================================
+
+name: Build_OpenWrt-Lede
+
+on:
+  repository_dispatch:
+  workflow_dispatch:
+    inputs:
+        
+  #push:
+  #  branches: 
+  #    - master
+
+  schedule:
+    - cron: 0 0 * * 6
+  
+  #watch:
+  #  types: [started]
+  
+env:
+  REPO_URL: https://github.com/coolsnowwolf/lede
+  REPO_BRANCH: master
+  CONFIG_FILE: .config
+  SCRIPT_SH: script.sh
+  SRC_SH: src.sh
+  UPLOAD_FIRMWARE: true
+  TZ: Asia/Shanghai
+  FILE_NAME: Openwrt
+  PRODUCT_NAME: Openwrt
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    if: github.event.repository.owner.id == github.event.sender.id
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Initialization environment
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
+        sudo -E apt-get -qq update
+        sudo -E apt-get -qq install $(curl -fsSL https://is.gd/depends_ubuntu_2204)
+        sudo -E apt-get -qq autoremove --purge
+        sudo -E apt-get -qq clean
+        sudo timedatectl set-timezone "$TZ"
+    - name: Clone source code
+      run: |
+        git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
+        cd openwrt
+        useVersionInfo=$(git show -s --date=short --format="date: %cd<br/>commit: %s<br/>commit hash: %H")
+        echo "useVersionInfo=$useVersionInfo" >> $GITHUB_ENV
+        echo "DATE=$(date "+%Y-%m-%d %H:%M:%S")" >> $GITHUB_ENV
+        echo "tag_name=$(date +%Y%m%d)" >> $GITHUB_ENV
+        
+    - name: Load custom feeds
+      run: |
+        [ -e files ] && mv files openwrt/files
+        chmod +x $SCRIPT_SH
+        ./$SCRIPT_SH
+        
+    - name: Update feeds
+      run: |
+        chmod +x $SRC_SH
+        ./$SRC_SH        
+        
+    - name: Update & Install feeds
+      working-directory: ./openwrt
+      run: |
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
+        ./scripts/feeds install -a
+        
+    #- name: Import external feeds - JerryKuKu Argon
+    #  working-directory: ./openwrt
+    #  run: |
+    #    git clone -b 18.06 https://github.com/jerrykuku/luci-theme-argon.git package/luci-theme-argon-jerrykuku   
+  
+    - name: Configuration Customization
+      env:
+        CONFIG_FILE: 'X86_64.config'
+      run: |
+        [ -d "files" ] && mv -f files openwrt/files
+        [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
+        chmod +x ./customize.sh && ./customize.sh
+        cd openwrt && make defconfig
+        
+    - name: Download package
+      working-directory: ./openwrt
+      run: |
+        make download -j$(nproc)
+        find dl -size -1024c -exec ls -l {} \;
+        find dl -size -1024c -exec rm -f {} \;
+    - name: Build firmware
+      working-directory: ./openwrt
+      run: |
+        echo -e "$(nproc) thread build."
+        make V=s -j$(nproc)
+
+    - name: Upload firmware directory
+      uses: actions/upload-artifact@v3
+      if: steps.organize.outputs.status == 'success' && !cancelled()
+      with:
+        name: OpenWrt_firmware
+        path: |
+            ${{ env.FIRMWARE }}
+            ${{ env.PACKAGED_OUTPUTPATH }}
+
+    - name: Upload OpenWrt Firmware to Release
+      uses: ncipollo/release-action@main
+      with:
+        name: ${{ env.DATE }} for ${{ env.FILE_NAME }}
+        tag: ${{ env.PRODUCT_NAME }}_${{ env.tag_name }}
+        allowUpdates: true
+        removeArtifacts: true
+        artifacts: ${{ env.PACKAGED_OUTPUTPATH }}/*
+        token: ${{ secrets.GITHUB_TOKEN }}
+        body: |
+          编译固件简介:
+          ${{ env.useVersionInfo }}         
+            打包日期：${{ env.PACKAGED_OUTPUTDATE }}
+            当前使用版本:【编译前的最后一次➦[主源码](https://github.com/coolsnowwolf/lede)更新记录】
+            默认IP：192.168.1.10 用户名：root 默认密码：password
+                   
+    - name: Delete workflow runs
+      uses: GitRML/delete-workflow-runs@main
+      with:
+        token: ${{ secrets.GH_TOKEN }}
+        repository: ${{ github.repository }}
+        retain_days: 60
+        keep_minimum_runs: 60
+ 
+    - name: Remove old Releases
+      uses: dev-drprasad/delete-older-releases@v0.1.0
+      with:
+        keep_latest: 60
+        delete_tags: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
