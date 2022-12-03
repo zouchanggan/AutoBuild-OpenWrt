@@ -52,6 +52,7 @@ jobs:
         sudo -E apt-get -qq autoremove --purge
         sudo -E apt-get -qq clean
         sudo timedatectl set-timezone "$TZ"
+        
     - name: Clone source code
       run: |
         git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
@@ -61,12 +62,9 @@ jobs:
         echo "DATE=$(date "+%Y-%m-%d %H:%M:%S")" >> $GITHUB_ENV
         echo "tag_name=$(date +%Y%m%d)" >> $GITHUB_ENV
         
-    - name: Load custom feeds
-      run: |
-        [ -e files ] && mv files openwrt/files
-        
     - name: Update feeds
       run: |
+        [ -e files ] && mv files openwrt/files
         chmod +x $SRC_SH
         ./$SRC_SH        
         
@@ -103,14 +101,11 @@ jobs:
         echo -e "$(nproc) thread build."
         make V=s -j$(nproc)
 
-    - name: Upload firmware directory
-      uses: actions/upload-artifact@v3
-      if: steps.organize.outputs.status == 'success' && !cancelled()
+    - name : Upload artifact
+      uses: actions/upload-artifact@master
       with:
         name: OpenWrt_firmware
-        path: |
-            ${{ env.FIRMWARE }}
-            ${{ env.PACKAGED_OUTPUTPATH }}
+        path: openwrt/bin
 
     - name: Upload OpenWrt Firmware to Release
       uses: ncipollo/release-action@main
