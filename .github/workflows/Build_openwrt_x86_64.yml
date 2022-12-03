@@ -29,6 +29,7 @@ env:
   #SCRIPT_SH: script.sh
   SRC_SH: src.sh
   UPLOAD_FIRMWARE: true
+  UPLOAD_RELEASE: true
   TZ: Asia/Shanghai
   FILE_NAME: Openwrt
   PRODUCT_NAME: Openwrt
