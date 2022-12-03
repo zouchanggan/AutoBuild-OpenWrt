@@ -26,7 +26,7 @@ env:
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
   CONFIG_FILE: .config
-  SCRIPT_SH: script.sh
+  #SCRIPT_SH: script.sh
   SRC_SH: src.sh
   UPLOAD_FIRMWARE: true
   TZ: Asia/Shanghai
@@ -64,8 +64,6 @@ jobs:
     - name: Load custom feeds
       run: |
         [ -e files ] && mv files openwrt/files
-        chmod +x $SCRIPT_SH
-        ./$SCRIPT_SH
         
     - name: Update feeds
       run: |
@@ -86,7 +84,7 @@ jobs:
   
     - name: Configuration Customization
       env:
-        CONFIG_FILE: 'X86_64.config'
+        CONFIG_FILE: 'x86_64.config'
       run: |
         [ -d "files" ] && mv -f files openwrt/files
         [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
