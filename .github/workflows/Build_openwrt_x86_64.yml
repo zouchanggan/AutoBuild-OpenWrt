@@ -5,7 +5,7 @@
 # Youtube Channel: https://goo.gl/fvkdwm 
 #=================================================
 
-name: Build_OpenWrt-Lede
+name: OpenWrt-Lede
 
 on:
   repository_dispatch:
