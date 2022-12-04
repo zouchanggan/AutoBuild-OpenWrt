@@ -111,14 +111,14 @@ jobs:
         path: openwrt/bin
 
     - name: Upload OpenWrt Firmware to Release
-      uses: ncipollo/release-action@main
-      with:
-        tag: ${{ env.DATE }} for ${{ env.FILE_NAME }}
-        allowUpdates: true
-        removeArtifacts: true
-        artifacts: ${{ env.PACKAGED_OUTPUTPATH }}/*
-        token: ${{ secrets.GITHUB_TOKEN }}
-        body: |
+        uses: ncipollo/release-action@main
+        if: env.PACKAGED_STATUS == 'success' && !cancelled()
+        with:
+          tag: OpenWrt_${{ env.PACKAGED_OUTPUTDATE }}
+          artifacts: ${{ env.PACKAGED_OUTPUTPATH }}/*
+          allowUpdates: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+         body: |
           编译固件简介:
           ${{ env.useVersionInfo }}         
             打包日期：${{ env.PACKAGED_OUTPUTDATE }}
