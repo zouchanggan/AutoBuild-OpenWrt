@@ -108,7 +108,9 @@ jobs:
       uses: actions/upload-artifact@master
       with:
         name: OpenWrt_firmware${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
-        path: openwrt/bin
+        path: |
+            ${{ env.FIRMWARE }}
+            ${{ env.PACKAGED_OUTPUTPATH }}
 
     - name: Upload OpenWrt Firmware to Release
       uses: ncipollo/release-action@main
