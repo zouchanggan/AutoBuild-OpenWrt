@@ -5,7 +5,7 @@
 # Youtube Channel: https://goo.gl/fvkdwm 
 #=================================================
 
-name: OpenWrt
+ name: Build_OpenWrt
 
 on:
   repository_dispatch:
@@ -17,10 +17,10 @@ on:
   #    - master
 
   schedule:
-    - cron: 0 0 * * 4
-
+    - cron: 0 0 * * 5
+  
   #watch:
-  #  types: [started]    
+  #  types: [started] 
 
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
