@@ -1,6 +1,11 @@
+#=================================================
+# Description: Build OpenWrt using GitHub Actions
+# Lisence: MIT
+# Author: eSirPlayground
+# Youtube Channel: https://goo.gl/fvkdwm 
+#=================================================
 
 name: OpenWrt-x86_64
-
 
 on:
   repository_dispatch:
@@ -15,7 +20,7 @@ on:
     - cron: 0 0 * * 6
   
   #watch:
-  #  types: [started]       
+  #  types: [started]    
 
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
