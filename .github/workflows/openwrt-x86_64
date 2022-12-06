@@ -12,15 +12,15 @@ on:
   workflow_dispatch:
     inputs:
         
-  #push:
-  #  branches: 
-  #    - master
+  push:
+    branches: 
+      - master
 
   #schedule:
   #  - cron: 0 0 * * 5
   
-  watch:
-    types: [started] 
+  #watch:
+  #  types: [started] 
 
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
