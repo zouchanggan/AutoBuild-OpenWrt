@@ -5,7 +5,7 @@
 # Youtube Channel: https://goo.gl/fvkdwm 
 #=================================================
 
-name: OpenWrt-x86_64
+name: OpenWrt
 
 on:
   repository_dispatch:
