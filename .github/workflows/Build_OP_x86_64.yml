@@ -1,21 +1,25 @@
+#=================================================
+# Description: Build OpenWrt using GitHub Actions
+# Lisence: MIT
+# Author: eSirPlayground
+# Youtube Channel: https://goo.gl/fvkdwm 
+#=================================================
 
-name: N1-OpenWrt-Lede
+name: Build_x86_64
 
+on: 
+  release:
+    types: [published]
 
-on:
-  repository_dispatch:
-  workflow_dispatch:
-    inputs:
-        
   #push:
   #  branches: 
   #    - master
 
-  schedule:
-    - cron: 0 0 * * 6
+  #schedule:
+  #  - cron: 0 8 * * 5
   
   #watch:
-  #  types: [started]       
+  #  types: [started]      
 
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
