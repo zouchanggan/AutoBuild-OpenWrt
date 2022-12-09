@@ -35,9 +35,9 @@ env:
   PRODUCT_NAME: Openwrt
 
 jobs:
-  build_openwrt:
-    name: Build OpenWrt and release
-    runs-on: ubuntu-20.04
+  build:
+    runs-on: ubuntu-22.04
+    if: github.event.repository.owner.id == github.event.sender.id
 
     steps:
     - name: Checkout
