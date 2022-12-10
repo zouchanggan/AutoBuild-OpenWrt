@@ -25,97 +25,80 @@ on:
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
-  SCRIPT_SH: script.sh
-  CONFIG_SH: config.sh
-  UPLOAD_FIRMWARE: true
+  CONFIG_FILE: .config
+  SRC_SH: src.sh
+  UPLOAD_FIRMWARE: false
+  UPLOAD_RELEASE: true
+  RECENT_LASTEST: 30
   TZ: Asia/Shanghai
+  FILE_NAME: Openwrt
+  PRODUCT_NAME: Openwrt
 
 jobs:
-  build_openwrt:
-    name: Build OpenWrt and release
-    runs-on: ubuntu-20.04
+  build:
+    runs-on: ubuntu-22.04
+    if: github.event.repository.owner.id == github.event.sender.id || ! github.event.sender.id
 
     steps:
     - name: Checkout
       uses: actions/checkout@v2
-      with:
-        ref: main
 
     - name: Initialization environment
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
         docker rmi `docker images -q`
-        sudo rm -rf /usr/share/dotnet /etc/mysql /etc/php /etc/apt/sources.list.d
-        sudo -E apt-get -y purge azure-cli ghc* zulu* hhvm llvm* firefox google* dotnet* powershell openjdk* mysql* php*
-        sudo -E apt update -y
-        sudo -E apt full-upgrade -y
-        sudo -E apt install -y ack antlr3 asciidoc autoconf automake autopoint binutils bison build-essential bzip2 ccache cmake cpio curl device-tree-compiler fastjar flex gawk gettext gcc-multilib g++-multilib git gperf haveged help2man intltool libc6-dev-i386 libelf-dev libglib2.0-dev libgmp3-dev libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev libreadline-dev libssl-dev libtool lrzsz mkisofs msmtp nano ninja-build p7zip p7zip-full patch pkgconf python2.7 python3 python3-pip qemu-utils rsync scons squashfs-tools subversion swig texinfo uglifyjs upx-ucl unzip vim wget xmlto xxd zlib1g-dev
-        sudo -E apt-get -y autoremove --purge
-        sudo -E apt-get clean
+        sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
+        sudo -E apt-get -qq update
+        sudo -E apt-get -qq install $(curl -fsSL https://is.gd/depends_ubuntu_2204)
+        sudo -E apt-get -qq autoremove --purge
+        sudo -E apt-get -qq clean
         sudo timedatectl set-timezone "$TZ"
-        df -h
-        
+        sudo mkdir -p /workdir
+        sudo chown $USER:$GROUPS /workdir
     - name: Clone source code
+      working-directory: /workdir
       run: |
-        git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
+        df -hT $PWD
+        git clone $REPO_URL -b $REPO_BRANCH openwrt
+        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
         cd openwrt
-        useVersionInfo=$(git show -s --date=short --format="date: %cd<br/>commit: %s<br/>commit hash: %H")
+        useVersionInfo=$(git show -s --date=short --format="Author: %an<br/>date: %cd<br/>commit: %s<br/>commit hash: %H")
         echo "useVersionInfo=$useVersionInfo" >> $GITHUB_ENV
         echo "DATE=$(date "+%Y-%m-%d %H:%M:%S")" >> $GITHUB_ENV
-        echo "tag_name=$(date +%Y%m%d)" >> $GITHUB_ENV
-        
+        echo "DATE1=$(date "+%Y-%m-%d")" >> $GITHUB_ENV        
+
     - name: Update feeds
       run: |
-        chmod +x $SCRIPT_SH
-        ./$SCRIPT_SH
-        cd openwrt
-        #sed -i 's/#src-git helloworld/src-git helloworld/g' ./feeds.conf.default
+        [ -e files ] && mv files openwrt/files
+        chmod +x $SRC_SH
+        ./$SRC_SH        
+        
+    - name: Update & Install feeds
+      working-directory: ./openwrt
+      run: |
         ./scripts/feeds update -a
-    - name: Install feeds
-      run: |
-        cd openwrt
         ./scripts/feeds install -a
-    - name: Load custom configuration
-      run: |
-        chmod +x $CONFIG_SH
-        ./$CONFIG_SH
-    - name: Download package
-      run: |
-        cd openwrt
-        make defconfig
-        make download -j8
-        find dl -size -1024c -exec rm -f {} \;
-    - name: Compile the firmware
-      run: |
-        cd openwrt
-        echo -e "$(nproc) thread compile"
-        make -j$(nproc) || make -j1 V=s
-        echo "======================="
-        echo "Space usage:"
-        echo "======================="
-        df -h
-        echo "======================="
-        du -h --max-depth=1 ./ --exclude=build_dir --exclude=bin
-        du -h --max-depth=1 ./build_dir
-        du -h --max-depth=1 ./bin
-        echo "::set-output name=status::success"
+        ./scripts/feeds install -a
         
-    - name: Organize files
-      id: organize
-      if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
+    #- name: Import external feeds - poweroff
+      #working-directory: ./openwrt
+      #run: |
+        #git clone https://github.com/esirplayground/luci-app-poweroff.git package/luci-app-poweroff
+  
+    - name: Configuration Customization
+      env:
+        CONFIG_FILE: 'x86_64.config'
       run: |
-        cd openwrt/bin/targets/*/*
-        rm -rf packages feeds.buildinfo openwrt-x86-64-generic-kernel.bin openwrt-x86-64-generic-squashfs-rootfs.img openwrt-x86-64-generic.manifest sha256sums version.buildinfo
-        echo "FIRMWARE=$PWD" >> $GITHUB_ENV
-        echo "::set-output name=status::success"
-        
-    - name: Upload firmware directory
-      uses: actions/upload-artifact@main
-      if: steps.organize.outputs.status == 'success' && !cancelled()
+        [ -d "files" ] && mv -f files openwrt/files
+        [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
+        chmod +x ./customize.sh && ./customize.sh
+        cd openwrt && make defconfig
+    - name: Upload artifact to Actions
+      uses: kittaakos/upload-artifact-as-is@master
+      if: env.PACKAGED_STATUS == 'success' && env.UPLOAD_FIRMWARE == 'true' && !cancelled()
       with:
-        name: OpenWrt_firmware
-        path: ${{ env.FIRMWARE }}
+        path: ${{ env.PACKAGED_OUTPUTPATH }}/
             
     - name: Upload OpenWrt Firmware to Release
       uses: ncipollo/release-action@main
