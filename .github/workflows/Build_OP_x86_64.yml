@@ -67,7 +67,8 @@ jobs:
         useVersionInfo=$(git show -s --date=short --format="Author: %an<br/>date: %cd<br/>commit: %s<br/>commit hash: %H")
         echo "useVersionInfo=$useVersionInfo" >> $GITHUB_ENV
         echo "DATE=$(date "+%Y-%m-%d %H:%M:%S")" >> $GITHUB_ENV
-        echo "DATE1=$(date "+%Y-%m-%d")" >> $GITHUB_ENV        
+        echo "DATE1=$(date "+%Y-%m-%d")" >> $GITHUB_ENV   
+        echo "tag_name=$(date +%Y%m%d)" >> $GITHUB_ENV
 
     - name: Update feeds
       run: |
@@ -107,29 +108,26 @@ jobs:
       working-directory: ./openwrt
       run: |
         echo -e "$(nproc) thread build."
-        make -j$(nproc) V=s        
-    - name: Upload artifact to Actions
-      uses: kittaakos/upload-artifact-as-is@master
-      if: env.PACKAGED_STATUS == 'success' && env.UPLOAD_FIRMWARE == 'true' && !cancelled()
+        make -j$(nproc) V=s     
+        
+    - name : Upload artifact
+      uses: actions/upload-artifact@master
       with:
-        path: ${{ env.PACKAGED_OUTPUTPATH }}/
+        name: OpenWrt_firmware
+        path: openwrt/bin
             
     - name: Upload OpenWrt Firmware to Release
-      uses: ncipollo/release-action@main
+      uses: ncipollo/release-action@v1
       with:
-        name: ${{ env.DATE }} for ${{ env.FILE_NAME }}
+        name: ${{ env.DATE }} ❤️ | OpenWrt 自动编译
         allowUpdates: true
-        removeArtifacts: true
-        tag: ${{ env.PRODUCT_NAME }}_${{ env.tag_name }}
+        tag: ${{ env.tag_name }}
         commit: main
-        token: ${{ secrets.GITHUB_TOKEN }}
-        artifacts: ${{ env.PACKAGED_OUTPUTPATH }}/*
+        token: ${{ secrets.actions_release }}
         body: |
-          编译固件简介:
+          编译使用版本:
           ${{ env.useVersionInfo }}
-            打包日期：${{ env.PACKAGED_OUTPUTDATE }}
-            当前使用版本:【编译前的最后一次➦[主源码](https://github.com/coolsnowwolf/lede)更新记录】
-            默认IP：192.168.1.10 用户名：root 默认密码：password
+        artifacts: "${{ env.FIRMWARE }}/*"
                    
     - name: Delete workflow runs
       uses: GitRML/delete-workflow-runs@main
