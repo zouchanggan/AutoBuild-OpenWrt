@@ -83,10 +83,10 @@ jobs:
         ./scripts/feeds install -a
         ./scripts/feeds install -a
         
-    - name: Import external feeds - luci-app-poweroff
+    - name: Import external feeds - poweroff
       working-directory: ./openwrt
       run: |
-        git clone https://github.com/esirplayground/luci-app-poweroff.git package/lean
+        git clone https://github.com/esirplayground/luci-app-poweroff.git package/esir
   
     - name: Configuration Customization
       env:
