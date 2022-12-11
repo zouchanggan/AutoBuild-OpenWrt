@@ -95,10 +95,10 @@ jobs:
         ./scripts/feeds install -a
         ./scripts/feeds install -a
         
-    - name: Import external feeds - luci-app-poweroff
+    - name: Import external feeds 
       working-directory: ./openwrt
       run: |
-        git clone https://github.com/esirplayground/luci-app-poweroff.git package/lean
+        git clone https://github.com/esirplayground/luci-app-poweroff.git package/esir
   
     - name: Configuration Customization
       env:
@@ -128,7 +128,7 @@ jobs:
         name: OpenWrt_firmware
         path: openwrt/bin
     
-    - name: Deploy Files To Release
+    - name: Upload OpenWrt Firmware to Release
       uses: ncipollo/release-action@v1.8.0
       if: env.FIRMWARE_RELEASE_UPLOAD == 'true'
       with:
@@ -140,3 +140,19 @@ jobs:
         commit: ${{ env.CURRENT_BRANCH }}
         token: ${{ secrets.GITHUB_TOKEN }}
         artifacts: ${{ env.OPENWRT_ROOT_PATH }}/bin/targets/${{ env.DEVICE_TARGET }}/${{ env.DEVICE_SUBTARGET }}/*
+        
+    - name: Delete workflow runs
+      uses: GitRML/delete-workflow-runs@main
+      with:
+        token: ${{ secrets.GH_TOKEN }}
+        repository: ${{ github.repository }}
+        retain_days: 60
+        keep_minimum_runs: 60
+ 
+    - name: Remove old Releases
+      uses: dev-drprasad/delete-older-releases@v0.1.0
+      with:
+        keep_latest: 5
+        delete_tags: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
