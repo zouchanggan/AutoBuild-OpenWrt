@@ -38,7 +38,6 @@ env:
 jobs:
   build:
     runs-on: ubuntu-22.04
-    if: github.event.repository.owner.id == github.event.sender.id || ! github.event.sender.id
     
     outputs:
       OPENWRT_ROOT_PATH: ${{ steps.clone.outputs.OPENWRT_ROOT_PATH }}
@@ -130,14 +129,14 @@ jobs:
         path: openwrt/bin
     
     - name: Deploy Files To Release
-       uses: ncipollo/release-action@v1.8.0
-        if: env.FIRMWARE_RELEASE_UPLOAD == 'true'
-        with:
-          name: openwrt-${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}
-          allowUpdates: true
-          replacesArtifacts: true
-          tag: ${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}
-          body: ${{ env.BUILD_DATE }}
-          commit: ${{ env.CURRENT_BRANCH }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-          artifacts: ${{ env.OPENWRT_ROOT_PATH }}/bin/targets/${{ env.DEVICE_TARGET }}/${{ env.DEVICE_SUBTARGET }}/*
+      uses: ncipollo/release-action@v1.8.0
+      if: env.FIRMWARE_RELEASE_UPLOAD == 'true'
+      with:
+        name: openwrt-${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}
+        allowUpdates: true
+        replacesArtifacts: true
+        tag: ${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}
+        body: ${{ env.BUILD_DATE }}
+        commit: ${{ env.CURRENT_BRANCH }}
+        token: ${{ secrets.GITHUB_TOKEN }}
+        artifacts: ${{ env.OPENWRT_ROOT_PATH }}/bin/targets/${{ env.DEVICE_TARGET }}/${{ env.DEVICE_SUBTARGET }}/*
