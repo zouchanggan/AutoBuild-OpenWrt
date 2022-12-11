@@ -5,7 +5,7 @@
 # Youtube Channel: https://goo.gl/fvkdwm 
 #=================================================
 
-name: OpenWrt-Lede-x86_64
+name: Build_OpenWrt-Demo
 
 on:
   repository_dispatch:
@@ -17,7 +17,7 @@ on:
   #    - master
 
   schedule:
-    - cron: 0 0 * * 6
+    - cron: 0 0 * * 5
   
   #watch:
   #  types: [started]
@@ -113,35 +113,23 @@ jobs:
         name: OpenWrt_firmware
         path: ${{ env.FIRMWARE }}
 
-    - name: Upload OpenWrt Firmware to Release
-      uses: ncipollo/release-action@main
+    - name: Create release
+      uses: ncipollo/release-action@v1
       with:
-        name: ${{ env.DATE }} for ${{ env.FILE_NAME }}
+        name: ${{ env.DATE }} ❤️ | OpenWrt 自动编译
         allowUpdates: true
-        removeArtifacts: true
-        tag: ${{ env.PRODUCT_NAME }}_${{ env.tag_name }}
+        tag: ${{ env.tag_name }}
         commit: main
         token: ${{ secrets.GITHUB_TOKEN }}
-        artifacts: ${{ env.PACKAGED_OUTPUTPATH }}/*
         body: |
-          编译固件简介:
+          编译使用版本:
           ${{ env.useVersionInfo }}
-            打包日期：${{ env.PACKAGED_OUTPUTDATE }}
-            当前使用版本:【编译前的最后一次➦[主源码](https://github.com/coolsnowwolf/lede)更新记录】
-            默认IP：192.168.1.10 用户名：root 默认密码：password
-                   
-    - name: Delete workflow runs
-      uses: GitRML/delete-workflow-runs@main
-      with:
-        token: ${{ secrets.GH_TOKEN }}
-        repository: ${{ github.repository }}
-        retain_days: 60
-        keep_minimum_runs: 60
- 
+        artifacts: "${{ env.FIRMWARE }}/*"
+
     - name: Remove old Releases
       uses: dev-drprasad/delete-older-releases@v0.1.0
       with:
-        keep_latest: 5
+        keep_latest: 3
         delete_tags: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
