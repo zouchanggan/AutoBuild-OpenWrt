@@ -62,25 +62,28 @@ jobs:
         df -hT $PWD
         git clone $REPO_URL -b $REPO_BRANCH openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
-    - name: Load custom feeds
-      run: |
-        [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
-        chmod +x $SRC_SH
-        cd openwrt
-        $GITHUB_WORKSPACE/$SRC_SH
     - name: Update feeds
-      run: cd openwrt && ./scripts/feeds update -a
-
-    - name: Install feeds
-      run: cd openwrt && ./scripts/feeds install -a
-
-    - name: Load custom configuration
       run: |
         [ -e files ] && mv files openwrt/files
+        chmod +x $SRC_SH
+        ./$SRC_SH        
+        
+    - name: Update & Install feeds
+      working-directory: ./openwrt
+      run: |
+        ./scripts/feeds update -a
+        ./scripts/feeds install -a
+        ./scripts/feeds install -a
+
+    - name: Configuration Customization
+      env:
+        CONFIG_FILE: 'x86_64.config'
+      run: |
+        [ -d "files" ] && mv -f files openwrt/files
         [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
-        chmod +x $CONFIG_SH
+        chmod +x ./customize.sh && ./customize.sh
         cd openwrt
-        $GITHUB_WORKSPACE/$CONFIG_SH
+        $GITHUB_WORKSPACE/$CUSTOMIZE_SH
 
     - name: Download package
       id: package
