@@ -127,20 +127,22 @@ jobs:
       with:
         name: OpenWrt_firmware
         path: openwrt/bin
-    
-    - name: Upload OpenWrt Firmware to Release
-      uses: ncipollo/release-action@v1.8.0
-      if: env.FIRMWARE_RELEASE_UPLOAD == 'true'
+
+    - name: Create release
+      uses: ncipollo/release-action@v1
       with:
-        name: openwrt-${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}
+        tag: OpenWrt_${{ env.PACKAGED_OUTPUTDATE }}
+        name: OpenWrt | ${{ env.DATE }}
         allowUpdates: true
-        replacesArtifacts: true
-        tag: ${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}
-        body: ${{ env.BUILD_DATE }}
-        commit: ${{ env.CURRENT_BRANCH }}
+        artifacts: ${{ env.PACKAGED_OUTPUTPATH }}/*
         token: ${{ secrets.GITHUB_TOKEN }}
-        artifacts: ${{ env.OPENWRT_ROOT_PATH }}/bin/targets/${{ env.DEVICE_TARGET }}/${{ env.DEVICE_SUBTARGET }}/*
-        
+        body: |
+          OpenWrt 精简版本
+                                    
+            * 默认IP：192.168.1.10
+            默认用户名：root
+            默认密码：password
+          
     - name: Delete workflow runs
       uses: GitRML/delete-workflow-runs@main
       with:
